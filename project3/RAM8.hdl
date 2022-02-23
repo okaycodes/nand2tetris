@@ -17,34 +17,12 @@ CHIP RAM8 {
     PARTS:
     //1. DMux8Way sends the incoming 16-bit towards the needed address and sends 0 everywhere else
     DMux8Way16(in=in, sel=address, a=a, b=b, c=c, d=d, e=e, f=f, g=g, h=h);
-
-    ZeroOrLess16(x=a, zr=loada);
-    ZeroOrLess16(x=b, zr=loadb);
-    ZeroOrLess16(x=c, zr=loadc);
-    ZeroOrLess16(x=d, zr=loadd);
-    ZeroOrLess16(x=e, zr=loade);
-    ZeroOrLess16(x=f, zr=loadf);
-    ZeroOrLess16(x=g, zr=loadg);
-    ZeroOrLess16(x=h, zr=loadh);
-
-    Not(in=loada, out=notloada);
-    Not(in=loadb, out=notloadb);
-    Not(in=loadc, out=notloadc);
-    Not(in=loadd, out=notloadd);
-    Not(in=loade, out=notloade);
-    Not(in=loadf, out=notloadf);
-    Not(in=loadg, out=notloadg);
-    Not(in=loadh, out=notloadh);
-
-    And(a=notloada, b=load, out=loadav);
-    And(a=notloadb, b=load, out=loadbv);
-    And(a=notloadc, b=load, out=loadcv);
-    And(a=notloadd, b=load, out=loaddv);
-    And(a=notloade, b=load, out=loadev);
-    And(a=notloadf, b=load, out=loadfv);
-    And(a=notloadg, b=load, out=loadgv);
-    And(a=notloadh, b=load, out=loadhv);
-
+    //2. DMux8Way sends the incoming load-bit value to the same ram address and sends 0 everywhere else
+    DMux8Way(in=load, sel=address, a=loadav, b=loadbv, c=loadcv, d=loaddv, e=loadev, f=loadfv, g=loadgv, h=loadhv);
+    
+    //3. At individual register a new value is registered if the incoming load-bit is 1.
+    //3b. If the incoming load-bit is zero, as will be the case for 7 or all 8 addresses...
+    //the value at the address is left unchanged
     Register(in=a, load=loadav, out=outa);
     Register(in=b, load=loadbv, out=outb);
     Register(in=c, load=loadcv, out=outc);
