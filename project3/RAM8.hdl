@@ -1,0 +1,60 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/RAM8.hdl
+
+/**
+ * Memory of 8 registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM8 {
+    IN in[16], load, address[3];
+    OUT out[16];
+
+    PARTS:
+    //1. DMux8Way sends the incoming 16-bit towards the needed address and sends 0 everywhere else
+    DMux8Way16(in=in, sel=address, a=a, b=b, c=c, d=d, e=e, f=f, g=g, h=h);
+
+    ZeroOrLess16(x=a, zr=loada);
+    ZeroOrLess16(x=b, zr=loadb);
+    ZeroOrLess16(x=c, zr=loadc);
+    ZeroOrLess16(x=d, zr=loadd);
+    ZeroOrLess16(x=e, zr=loade);
+    ZeroOrLess16(x=f, zr=loadf);
+    ZeroOrLess16(x=g, zr=loadg);
+    ZeroOrLess16(x=h, zr=loadh);
+
+    Not(in=loada, out=notloada);
+    Not(in=loadb, out=notloadb);
+    Not(in=loadc, out=notloadc);
+    Not(in=loadd, out=notloadd);
+    Not(in=loade, out=notloade);
+    Not(in=loadf, out=notloadf);
+    Not(in=loadg, out=notloadg);
+    Not(in=loadh, out=notloadh);
+
+    And(a=notloada, b=load, out=loadav);
+    And(a=notloadb, b=load, out=loadbv);
+    And(a=notloadc, b=load, out=loadcv);
+    And(a=notloadd, b=load, out=loaddv);
+    And(a=notloade, b=load, out=loadev);
+    And(a=notloadf, b=load, out=loadfv);
+    And(a=notloadg, b=load, out=loadgv);
+    And(a=notloadh, b=load, out=loadhv);
+
+    Register(in=a, load=loadav, out=outa);
+    Register(in=b, load=loadbv, out=outb);
+    Register(in=c, load=loadcv, out=outc);
+    Register(in=d, load=loaddv, out=outd);
+    Register(in=e, load=loadev, out=oute);
+    Register(in=f, load=loadfv, out=outf);
+    Register(in=g, load=loadgv, out=outg);
+    Register(in=h, load=loadhv, out=outh);
+    
+    //Mux8Way16 selects and outputs the current/previous (and not incoming/just loaded) bit at the address
+    Mux8Way16(a=outa, b=outb, c=outc, d=outd, e=oute, f=outf, g=outg, h=outh, sel=address, out=out);
+
+}
