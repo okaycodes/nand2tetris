@@ -31,7 +31,8 @@ CHIP PC {
 
     //the register takes a value outy and stores that value or 0 
     //depending on if any of the three load-bits have a value of 1
-    Register(in=outy, load=loadx, out=outx);
+    //the result is split into out and stored in outx
+    Register(in=outy, load=loadx, out=outx, out=out);
     
     /*
     //outb is the increment of the final output, outx which starts at 0 since
@@ -51,8 +52,4 @@ CHIP PC {
 
     //outa will output zero if reset is 1 otherwise it simply outputs the input.
     Mux16(a=in, b=false, sel=reset, out=outa);
-    
-
-    //result takes outx and checks if a value is present, otherwise, returns zero.
-    And16(a=outx, b=true, out=out);
 }
