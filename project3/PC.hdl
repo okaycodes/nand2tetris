@@ -1,0 +1,58 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/PC.hdl
+
+/**
+ * A 16-bit counter with load and reset control bits.
+ * if      (reset[t] == 1) out[t+1] = 0
+ * else if (load[t] == 1)  out[t+1] = in[t]
+ * else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
+ * else                    out[t+1] = out[t]
+ */
+
+CHIP PC {
+    IN in[16],load,inc,reset;
+    OUT out[16];
+ 
+    PARTS:
+    //Primary
+    Not(in=reset, out=notr);
+    Not(in=load, out=notl);
+    
+    //the And operations look for the value when only r is one
+    And(a=notr, b=notl, out=notrl);
+    And(a=notrl, b=inc, out=incnotrl);
+    
+    //if either load, reset or inc is 1, a value has to be loaded to the Register
+    //hence we solve for loadx which takes into account the value of all three.
+    Or(a=load, b=reset, out=loada);
+    Or(a=loada, b=inc, out=loadx); 
+
+    //the register takes a value outy and stores that value or 0 
+    //depending on if any of the three load-bits have a value of 1
+    Register(in=outy, load=loadx, out=outx);
+    
+    /*
+    //outb is the increment of the final output, outx which starts at 0 since
+    //at the start of the process, there's no (0) output. 
+    */
+    Inc16(in=outx, out=outb);
+
+    /*
+    //outy selects between the outa, and outb such that if load and reset are false 
+    //while inc is true, (sel=incnotrl), what goes into the Register is the value of outx 
+    //increased by one, which will then be the output at t+1
+    //if either reset or load are true, the result of outa will be loaded into the Register 
+    //which will then be the output ant t+1.
+    */
+    Mux16(a=outa, b=outb, sel=incnotrl, out=outy);
+    
+
+    //outa will output zero if reset is 1 otherwise it simply outputs the input.
+    Mux16(a=in, b=false, sel=reset, out=outa);
+    
+
+    //result takes outx and checks if a value is present, otherwise, returns zero.
+    And16(a=outx, b=true, out=out);
+}
