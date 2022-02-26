@@ -9,37 +9,28 @@
 // This program only needs to handle arguments that satisfy
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
-//1. assign iterator as 0
+// Put your code here.
+
+//initialize iterator as 0
 @i
 M=0
 
-//initialize temporary mult variable
-@mult 
+//initialize multiplication factor as 0
+@mult
 M=0
 
-//initialize result as 0
+//reset result at R2
 @R2
 M=0
 
-//check which is higher between RO and R1
-@R0
-D=M;
 
-@R1
-D=D-M;
-
-//if R1 is higher jump
-@assignment2
-D;JLT
-
-if R0 is higher
-set R0 as a factor to be added to itself for R1 times
-and then proceed to loop. This is done for optimization
+//set R0 as a factor (x) to be added to itself for R1 times
 @R0
 D=M
 @x
 M=D
 
+//set R1 as a factor n for number of iteration
 @R1
 D=M
 @n
@@ -78,7 +69,7 @@ M=M+1
 0;JMP
 
 
-
+//at stop, assign mult value to R2 which is where result is to be saved
 (stop)
 @mult
 D=M
@@ -89,19 +80,3 @@ M=D
 (end)
 @end
 0; JMP
-
-(assignment2)
-as R1 is higher set R1 as a factor to be added to itself for R0 times
-and then proceed to loop. This is done for optimization
-@R0
-D=M
-@n
-M=D
-
-@R1
-D=M
-@x
-M=D
-
-@loop
-0;JMP
