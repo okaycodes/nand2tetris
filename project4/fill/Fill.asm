@@ -22,36 +22,35 @@ M=D
 
 //check the status of keyboard, if pressed implement fill, else implement reset
 (stop)
-@24576
+@KBD
 D=M 
 
 @fill
-D;JGT
+    D;JGT
 @reset
-D;JEQ
+    D;JEQ
 
 
 //fill while D is greater than Zero. 
 (fill)
 //initialize or reset iterator
 @i 
-M=1
+    M=1
 
 @16383 
-M=A
-D=M 
+    M=A
+    D=M 
 
-@8192
-M=A 
-A=D+M
-D=M
+@n
+    A=D+M
+    D=M
 
 @stop 
-D;JLT
+    D;JLT
 
 (fillloop)
-@i 
-D=M;
+    @i 
+    D=M;
 
 @n
 D=D-M;
@@ -89,8 +88,7 @@ M=1
 M=A
 D=M 
 
-@8192
-M=A 
+@n
 A=D+M
 D=M
 
@@ -131,5 +129,5 @@ M=0
 M=M+1
 
 //restart the resetloop
-@reset 
+@resetloop 
 0;JMP
