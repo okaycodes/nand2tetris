@@ -12,3 +12,106 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+//initialize counter variable
+@8192
+M=A 
+D=M 
+@n 
+M=D
+
+//check the status of keyboard, if pressed implement fill, else implement reset
+(stop)
+@24576
+D=M 
+
+@fill
+D;JGT
+@reset
+D;JGQ
+
+
+//fill while D is greater than Zero. 
+(fill)
+//initialize or reset iterator
+@i 
+M=1
+
+(fillloop)
+@i 
+D=M;
+
+@n
+D=D-M;
+
+@stop
+D;JGT
+//the above six lines checks if the iteration is complete and implement a jump to stop
+//or continue with loop.
+
+
+//access the base screen value
+@16383 
+D=M 
+
+//use screen value and current value of i as pointer to the next screen bit to be updated
+@i 
+A=D+M 
+//update the 16-bit screen value to -1(1111111111111111), all  black bits
+M=M-1
+
+//increment the iterator
+@i 
+M=M+1
+
+//restart fillloop
+@fillloop 
+0;JMP
+
+
+(reset)
+@i 
+M=1
+
+@24576
+D=M;
+
+@stop
+D;JGT
+
+//else continue loop. 
+(reset)
+
+//initialize or reset iterator
+@i 
+M=1
+
+(resetloop)
+@i 
+D=M;
+
+@n
+D=D-M;
+
+@stop
+D;JGT
+//the above six lines checks if the iteration is complete and implement a jump to stop
+//or continue with loop.
+
+//access the base screen value
+@16383 
+D=M 
+//use screen value and current value of i as pointer to the next screen bit to be updated
+@i 
+A=D+M 
+
+//update the 16-bit screen value to 0(0000000000000000), all  "white" bits
+M=0
+
+//increment the iterator
+@i 
+M=M+1
+
+//restart the resetloop
+@reset 
+0;JMP
