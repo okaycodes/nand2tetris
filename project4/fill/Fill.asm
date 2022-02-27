@@ -28,7 +28,7 @@ D=M
 @fill
 D;JGT
 @reset
-D;JGQ
+D;JEQ
 
 
 //fill while D is greater than Zero. 
