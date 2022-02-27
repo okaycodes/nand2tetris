@@ -37,6 +37,18 @@ D;JEQ
 @i 
 M=1
 
+@16383 
+M=A
+D=M 
+
+@8192
+M=A 
+A=D+M
+D=M
+
+@stop 
+D;JLT
+
 (fillloop)
 @i 
 D=M;
@@ -73,11 +85,17 @@ M=M+1
 @i 
 M=1
 
-@24576
-D=M;
+@16383 
+M=A
+D=M 
 
-@stop
-D;JGT
+@8192
+M=A 
+A=D+M
+D=M
+
+@stop 
+D;JEQ
 
 //else continue loop. 
 (reset)
