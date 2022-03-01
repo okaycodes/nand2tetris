@@ -14,7 +14,9 @@ CHIP Bit {
     OUT out;
 
     PARTS:
+    //the mux selects between the input (in) and the 
+    //previous output (outy) which starts at zero and changes 
+    //after the first result is received in the code
     Mux(a=outy, b=in, sel=load, out=outx);
-    DFF(in=outx, out=outy);
-    And(a=outy, b=true, out=out);
+    DFF(in=outx, out=outy, out=out);
 }
