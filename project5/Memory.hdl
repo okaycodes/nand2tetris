@@ -27,16 +27,33 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
+    /**
+    *DMux16 selects between two pathways for incoming value to follow based on the most 
+    *address bit(first bit from the left). This relies on the principle (thought really)
+    *that a all values in n-bit in binary are divided into two equal parts based on the 
+    *whether the value of the most significant bit is 0 or 1. if it is 0 the value is less 
+    *than half of all possible values, else it's greater than half of all possible values. 
+    *This basic principle is exploited over and over again as the input moves throw 16kRAM 
+    *down through 4KRAM, 512RAM ... 8RAM.
+    *The load bit is also processed in a similar manner.
+    */
     DMux16(in=in, sel=address[14], a=a, b=b);
     DMux(in=load, sel=address[14], a=loada, b=loadb);
-
+    
+    //value in first pathway is loaded into the 16K base memory
     RAM16K(in=a, address=address[0..13], load=loada, out=x);
 
+    /**
+    *value in second is split into two pathways just like (in) was initially and the same
+    *way as the initial value.
+    */
     DMux16(in=b, sel=address[13], a=u1, b=u2);
     DMux(in=loadb, sel=address[13], a=loadb1, b=loadb2);
 
+    //u1 is passed in to the 8KRAM Screen Chip and u2 is unused
     Screen(in=u1, address=address[0..12], load=loadb1, out=v1);
     Keyboard(out=v2);
+    //both mux16s selects a final output of the chip based on this most significant bit.
     Mux16(a=v1, b=v2, sel=address[13], out=y);
     Mux16(a=x, b=y, sel=address[14], out=out);
 }
