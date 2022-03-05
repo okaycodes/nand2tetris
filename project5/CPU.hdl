@@ -47,51 +47,51 @@ CHIP CPU {
     //when it is an aI, cI[15], what we want to pass into the A-Register is the incoming  value as 
     //an address, that is aI. when cI[15] is 1 then it is a C instruction so if any value is going to 
     //be stored in the A-Register it could only be the output of the ALU.
-    Mux16(a=aI, b=outm, sel=cI[15], out=a0);
+    Mux16(a=aI, b=outm, sel=instruction[15], out=a0);
 
     //Since we want to load the incoming value into the A-Register whenever the instruction is an aI,
-    //but load cI only when the destination bit at i[5] is 1, we use cI[5] as the load bit. It will 
-    //always be zero when the instruction is an aI, but if it is a cI[5], then the value at cI can either 
+    //but load Instruction only when the destination bit at i[5] is 1, we use Instruction[5] as the load bit. It will 
+    //always be zero when the instruction is an aI, but if it is a Instruction[5], then the value at Instruction can either 
     //be 0 or 1, hence will only load into the A-Register when this bit is 1.
     //the output is defined as outa which is the output at the A-Register.
-    Register(in=a0, load=cI[5], out=addressM, out=outa);
-    
+    ARegister(in=a0, load=instruction[5], out[0..14]=addressM, out=outa);
+
     //the Mux16 below selects between the incoming value at the currently selected memory inM and the
     //output of the A-Register as one of the values fed into the ALU
-    Mux16(a=inM, b=outa, sel=cI[12], out=outAorM);
+    Mux16(a=inM, b=outa, sel=instruction[12], out=outAorM);
 
-    //the bit at cI[4] is also one of the destination bits. Here it determines whether the output of 
+    //the bit at instruction[4] is also one of the destination bits. Here it determines whether the output of 
     //ALU outm is stored in the D-Register to be fed into the ALU for the next time cycle.
-    Register(in=outm, load=cI[4], out=outD);
+    DRegister(in=outm, load=instruction[4], out=outD);
     
     //the ALU takes in the outputs at the AorM mux and the D register and perform manipulations on
-    //them based on the control bits of the cI[6..11], it outputs finally outm which is not to be 
+    //them based on the control bits of the instruction[6..11], it outputs finally outm which is not to be 
     //confused with outM. outM is the final result, while outm is fed back into previously seen CHIPs
     //as an input.
     //zr and ng are used in determining load bits for the program counter.
-    ALU(a=outAorM, b=outD, zx=cI[11], nx=cI[10], zy=cI[9], ny=cI[8], f=cI[7], no=cI[6], 
+    ALU(x=outAorM, y=outD, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], 
     out=outm, out=outM, zr=zr, ng=ng);
     
-    //this simply outputs of of the cI bits into the memory and it will determine whether the output
+    //this simply outputs of of the instruction bits into the memory and it will determine whether the output
     //of the ALU gets saved in the Memory
-    And(a=cI[3], b=true, out=writeM);
+    And(a=instruction[3], b=true, out=writeM);
     
     //Processed load bits for program counter
 
     //the below five lines resolves inc load bit which is only one when all load bits are zero.
-    Not(in=cI[2], out=j1);
-    Not(in=cI[1], out=j2);
-    Not(in=cI[0], out=j3);
+    Not(in=instruction[2], out=j1);
+    Not(in=instruction[1], out=j2);
+    Not(in=instruction[0], out=j3);
     And(a=j1, b=j2, out=inc0);
     And(a=inc0, b=j3, out=inc);
 
     Not(in=zr, out=notzr);
     Not(in=ng, out=notng);
     
-    And(a=zr, b=cI[1], out=load1);
-    And(a=ng, b=cI[2], out=load2);
+    And(a=zr, b=instruction[1], out=load1);
+    And(a=ng, b=instruction[2], out=load2);
     And(a=notzr, b=notng, out=notzrnotng);
-    And(a=notzrnotng, b=cI[0], out=load3);
+    And(a=notzrnotng, b=instruction[0], out=load3);
     Or(a=load1, b=load2, out=load4);
     Or(a=load4, b=load3, out=load);
 
