@@ -53,19 +53,25 @@ CHIP CPU {
     And(a=instruction[15], b=instruction[4], out=writeD);
     And(a=instruction[15], b=instruction[3], out=writeM);
 
-    //if the incoming incoming instruction is an A instruction, it is selected to be loaded into the A-register, otherwise the previous output outm is selected
+    //if the incoming incoming instruction is an A instruction, it is selected to be loaded 
+    //into the A-register, otherwise the previous output outm is selected
     Mux16(a=instruction, b=outm, sel=instruction[15], out=a0);
     
-    //writeA is used to load either the incoming instruction when it is an address, or check whether the A-register destination bit is 1 and load outm.
+    //writeA is used to load either the incoming instruction when it is an address, or check 
+    //whether the A-register destination bit is 1 and load outm.
     ARegister(in=a0, load=writeA, out[0..14]=addressM, out=outa);
 
-    //Mux16 is used to select between the value coming from the A-Register, and the incomingvalue at inM to load as one of the arguments into the ALU using instruction[12] as select bit
+    //Mux16 is used to select between the value coming from the A-Register, and the incoming
+    //value at inM to load as one of the arguments into the ALU using instruction[12] as select bit
     Mux16(a=outa, b=inM, sel=instruction[12], out=outAorM);
 
-    //the D-Register, outputs the other value loaded into the ALU using the processed instruction[4] as load bit
+    //the D-Register, outputs the other value loaded into the ALU using the processed 
+    //instruction[4] as load bit
     DRegister(in=outm, load=writeD, out=outD);
     
-    //The computation bits, fed into the ALU are processed below. Each is set to 1 only if the instruction is a C instruction, (instruction[15]==1) and the value at the respective location is 1, else it is set to 0
+    //The computation bits, fed into the ALU are processed below. Each is set to 1 only 
+    //if the instruction is a C instruction, (instruction[15]==1) and the value at the 
+    //respective location is 1, else it is set to 0
     And(a=instruction[15], b=instruction[11], out=zx);
     And(a=instruction[15], b=instruction[10], out=nx);
     And(a=instruction[15], b=instruction[9], out=zy);
