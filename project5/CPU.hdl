@@ -78,19 +78,17 @@ CHIP CPU {
 
     
     //Processed load bits for program counter
-    Not(in=instruction[2], out=not1);
-    Not(in=instruction[1], out=not2);
-    Not(in=instruction[0], out=not3);
-    And(a=instruction[15], b=not1, out=i15notj1);
-    And(a=instruction[15], b=not2, out=i15notj2);
-    And(a=instruction[15], b=not3, out=i15notj3);
-    Not(in=i15notj1, out=j1);
-    Not(in=i15notj2, out=j2);
-    Not(in=i15notj3, out=j3);
-
+    //primary processing
     Not(in=zr, out=notzr);
     Not(in=ng, out=notng);
+
+    //taking into account whether incoming instruction is a C instruction
+    And(a=instruction[2], b=instruction[15], out=j1);
+    And(a=instruction[1], b=instruction[15], out=j2);
+    And(a=instruction[0], b=instruction[15], out=j3);
     
+    //jump is equal to 1, 
+    //when j1 == 1 and ng==1, or j2==1 and zr==1 or j3==1 and zr==0 and ng==0; 
     And(a=ng, b=j1, out=load1);
     And(a=zr, b=j2, out=load2);
     And(a=notzr, b=notng, out=notzrnotng);
@@ -99,9 +97,10 @@ CHIP CPU {
     Or(a=load4, b=load3, out=load);
 
     //the below lines resolves inc load bit which is only one when all load bits are zero.
-    Nand(a=j1, b=j2, out=inc0);
-    Nand(a=inc0, b=j3, out=inc);
+    Not(in=load, out=notload);
+    Not(in=reset, out=notreset);
+    And(a=notload, b=notreset, out=inc);
 
-    PC(in=outa,   inc=inc, load=load, out=PC);
+    PC(in=outa,  reset=reset, inc=inc, load=load, out[0..14]=pc);
 
 }
