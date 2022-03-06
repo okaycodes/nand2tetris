@@ -40,29 +40,45 @@ CHIP CPU {
 
     PARTS:
     //Primary
+    //rather than split instructions using a DMux, each of the destination bits
+    //are processed in a way that takes into account whether the incoming instruction 
+    //is an A instruction or C instruction.
+    //writeA is processed for instance such that when the incoming instruction is A, 
+    //(instruction[15]==0), it is always loaded into the A-register, else, the destination bit 
+    //at instruction[5] ('A' destination bit, is checked)
     Not(in=instruction[5], out=noti5);
-    Not(in=instruction[4], out=noti4);
-    Not(in=instruction[3], out=noti3);
     And(a=instruction[15], b=noti5, out=i15noti5);
-    And(a=instruction[15], b=noti4, out=i15noti4);
-    And(a=instruction[15], b=noti3, out=i15noti3);
     Not(in=i15noti5, out=writeA);
+
+    Not(in=instruction[4], out=noti4);
+    And(a=instruction[15], b=noti4, out=i15noti4);
     Not(in=i15noti4, out=writeD);
-    Not(in=i15noti3, out=writeM);
 
+    Not(in=instruction[3], out=noti3);
+    And(a=instruction[15], b=noti3, out=i15noti3);
+    Not(in=i15noti3, out=writeM); 
+
+    //if the incoming incoming instruction is an A instruction, it is selected to be loaded into the A-register, otherwise the previous output outm is selected
     Mux16(a=instruction, b=outm, sel=instruction[15], out=a0);
-
+    
+    //writeA is used to load either the incoming instruction when it is an address, or check whether the A-register destination bit is 1 and load outm.
     ARegister(in=a0, load=writeA, out[0..14]=addressM, out=outa);
+
+    //Mux16 is used to select between the value coming from the A-Register, and the incomingvalue at inM to load as one of the arguments into the ALU using instruction[12] as select bit
     Mux16(a=outa, b=inM, sel=instruction[12], out=outAorM);
 
+    //the D-Register, outputs the other value loaded into the ALU using the processed instruction[4] as load bit
     DRegister(in=outm, load=writeD, out=outD);
     
+    //The computation bits, fed into the ALU are processed below. Each is set to 1 only if the instruction is a C instruction, (instruction[15]==1) and the value at the respective location is 1, else it is set to 0
     And(a=instruction[15], b=instruction[11], out=zx);
     And(a=instruction[15], b=instruction[10], out=nx);
     And(a=instruction[15], b=instruction[9], out=zy);
     And(a=instruction[15], b=instruction[8], out=ny);
     And(a=instruction[15], b=instruction[7], out=f);
     And(a=instruction[15], b=instruction[6], out=no);
+
+    //the values are fed into the ALU and the outputs utilized.
     ALU(x=outAorM, y=outD, zx=zx, nx=nx, zy=zy, ny=ny, f=f, no=no, out=outm, out=outM, zr=zr, ng=ng);
 
     
@@ -77,10 +93,6 @@ CHIP CPU {
     Not(in=i15notj2, out=j2);
     Not(in=i15notj3, out=j3);
 
-    //the below five lines resolves inc load bit which is only one when all load bits are zero.
-    Nand(a=j1, b=j2, out=inc0);
-    Nand(a=inc0, b=j3, out=inc);
-
     Not(in=zr, out=notzr);
     Not(in=ng, out=notng);
     
@@ -90,6 +102,10 @@ CHIP CPU {
     And(a=notzrnotng, b=j3, out=load3);
     Or(a=load1, b=load2, out=load4);
     Or(a=load4, b=load3, out=load);
+
+    //the below lines resolves inc load bit which is only one when all load bits are zero.
+    Nand(a=j1, b=j2, out=inc0);
+    Nand(a=inc0, b=j3, out=inc);
 
     PC(in=outa,   inc=inc, load=load, out=PC);
 
