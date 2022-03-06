@@ -50,13 +50,8 @@ CHIP CPU {
     And(a=instruction[15], b=noti5, out=i15noti5);
     Not(in=i15noti5, out=writeA);
 
-    Not(in=instruction[4], out=noti4);
-    And(a=instruction[15], b=noti4, out=i15noti4);
-    Not(in=i15noti4, out=writeD);
-
-    Not(in=instruction[3], out=noti3);
-    And(a=instruction[15], b=noti3, out=i15noti3);
-    Not(in=i15noti3, out=writeM); 
+    And(a=instruction[15], b=instruction[4], out=writeD);
+    And(a=instruction[15], b=instruction[3], out=writeM);
 
     //if the incoming incoming instruction is an A instruction, it is selected to be loaded into the A-register, otherwise the previous output outm is selected
     Mux16(a=instruction, b=outm, sel=instruction[15], out=a0);
@@ -79,7 +74,7 @@ CHIP CPU {
     And(a=instruction[15], b=instruction[6], out=no);
 
     //the values are fed into the ALU and the outputs utilized.
-    ALU(x=outAorM, y=outD, zx=zx, nx=nx, zy=zy, ny=ny, f=f, no=no, out=outm, out=outM, zr=zr, ng=ng);
+    ALU(x=outD, y=outAorM, zx=zx, nx=nx, zy=zy, ny=ny, f=f, no=no, out=outm, out=outM, zr=zr, ng=ng);
 
     
     //Processed load bits for program counter
